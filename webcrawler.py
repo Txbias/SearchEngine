@@ -56,6 +56,10 @@ suburl_pattern = re.compile("(/[\w0-9]+)+")
 user_agent = 'Test'
 
 def crawl_page(url):
+
+    if not check_url(url):
+        return
+
     domain = get_domain(url)
     #http = hl.Http()
 
@@ -66,8 +70,11 @@ def crawl_page(url):
 
     soup = BeautifulSoup(content, "html.parser")
     links = soup.find_all('a')
+    try:
+        title = soup.find('title').string
+    except AttributeError:
+        title = url
 
-    title = soup.find('title').string
     title = str(title).replace("\n", " ")
     metas = soup.find_all('meta')
     description = ""
@@ -116,12 +123,15 @@ def crawl_page(url):
             print("link: ", link)
             domain = get_domain(link)
             robots_url = get_url_to_robots(get_url(domain))
-            robots = Robots.fetch(robots_url)
-            if not robots.allowed(link, user_agent):
+            try:
+                robots = Robots.fetch(robots_url)
+                if not robots.allowed(link, user_agent):
+                    print("Removed")
+                    filtered_links.remove(link)
+            except:
                 print("Removed")
                 filtered_links.remove(link)
-        else:
-            pass
+
 
 
     for link in filtered_links:
