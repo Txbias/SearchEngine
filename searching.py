@@ -24,13 +24,13 @@ def search(query, results):
         keywords.append(query)
         for keyword in keywords:
             try:
-                if keyword.lower() in site[0].lower():
+                if keyword.lower() in site[0].lower(): # link
+                    values[index] += 2
+
+                if keyword.lower() in site[1].lower(): # title
                     values[index] += 1
 
-                if keyword.lower() in site[1].lower():
-                    values[index] += 1
-
-                if keyword.lower() in site[2].lower():
+                if keyword.lower() in site[2].lower(): # description
                     values[index] += 1
             except AttributeError:
                 pass

@@ -193,6 +193,8 @@ def crawl():
             else:
                 crawl_page("https://github.com")
 
+        print(len(dbm.get_all_rows()))
+
 
 
 
