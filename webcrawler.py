@@ -8,6 +8,7 @@ import requests
 import threading
 from random import randint
 import sys
+import stopit
 
 
 def get_url_to_robots(url):
@@ -177,15 +178,18 @@ def crawl_page(url):
 
 
 def crawl():
-    rows = dbm.get_all_rows()
+    with stopit.ThreadingTimeout(100) as to_ctx_mgr:
+        assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
 
-    if len(rows) > 0:
-        index = randint(0, len(rows))
-        link = rows[index - 1][0]
+        rows = dbm.get_all_rows()
 
-        crawl_page(link)
-    else:
-        crawl_page("https://github.com")
+        if len(rows) > 0:
+            index = randint(0, len(rows))
+            link = rows[index - 1][0]
+
+            crawl_page(link)
+        else:
+            crawl_page("https://github.com")
 
 
 
