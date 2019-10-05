@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Search Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+  <body>
+    <div class="results">
+      {% for result in results %}
+            <a href="{{result[0]}}">{{result[1]}}</a> <br>
+      {% endfor %}
+    </div>
+  </body>
+</html>
