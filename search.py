@@ -35,23 +35,6 @@ def search(query, results):
 
         index += 1
 
-    '''
-    for site in rows_as_lists:
-        try:
-            if query.lower() in site[0].lower():
-        	     values[index] += 1
-
-        	if query.lower() in site[1].lower():
-        		values[index] += 1
-
-        	if query.lower() in site[2].lower():
-        		values[index] += 1
-        except AttributeError:
-            pass
-
-    	index += 1
-        '''
-
 
 
     valued_sites = list()
@@ -74,4 +57,5 @@ def search(query, results):
         for i in range(results):
             returns.append(valued_sites[i][0])
 
+        print(returns)
         return returns
