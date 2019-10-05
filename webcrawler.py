@@ -135,7 +135,7 @@ def crawl_page(url):
 
 
     for link in filtered_links:
-        content = content = requests.get(url).text     # str(http.request(link)[1]).strip() # content = str(http.request(link)[1]).encode('utf-8').strip().decode()
+        content = content = requests.get(link).text     # str(http.request(link)[1]).strip() # content = str(http.request(link)[1]).encode('utf-8').strip().decode()
         soup = BeautifulSoup(content, "html.parser")
         try:
             title = soup.find('title').string
