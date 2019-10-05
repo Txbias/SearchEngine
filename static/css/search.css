@@ -1,0 +1,10 @@
+.search_bar_div {
+  margin-top: 15%;
+  text-align: center;
+}
+
+
+input {
+  font-size: 200%;
+  width: 30%;
+}

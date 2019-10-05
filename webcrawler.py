@@ -133,8 +133,13 @@ def crawl_page(url):
                 filtered_links.remove(link)
 
 
-
+    index = 0
     for link in filtered_links:
+
+        if "#" in link:
+            link = link[:link.find("#")]
+            filtered_links[index] = link
+
         content = content = requests.get(link).text     # str(http.request(link)[1]).strip() # content = str(http.request(link)[1]).encode('utf-8').strip().decode()
         soup = BeautifulSoup(content, "html.parser")
         try:
@@ -168,7 +173,7 @@ def crawl_page(url):
 
     dbm.remove_duplicates()
 
-
+    index += 1
 
 
 def crawl():

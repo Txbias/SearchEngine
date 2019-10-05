@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Suche</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+  </head>
+  <body>
+      <div class="search_bar_div">
+        <form class="search_form" action="index.html" method="get">
+          <input type="text" name="search" autofocus value="{{request.form.search}}">
+        </form>
+      </div>
+  </body>
+</html>

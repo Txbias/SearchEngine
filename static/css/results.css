@@ -1,0 +1,28 @@
+.results {
+  margin-left: 2%;
+  text-align: left;
+}
+
+input {
+  font-size: 130%;
+  width: 30%;
+}
+
+.title {
+  font-size: 150%;
+}
+
+.link {
+  text-decoration: none;
+  color: black;
+}
+
+.search_bar_div {
+  margin-bottom: 3%;
+  margin-left: 2%;
+  margin-top: 5%;
+}
+
+p {
+  width: 50%;
+}

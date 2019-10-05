@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   </head>
   <body>
+
+    <div class="search_bar_div">
+      <form class="search_bar_form" action="index.html" method="get">
+        <input type="text" name="search" value="search"> <br>
+      </form>
+    </div>
+
     <div class="results">
       {% for result in results %}
             <a href="{{result[0]}}">{{result[1]}}</a> <br>
