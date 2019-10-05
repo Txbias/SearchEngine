@@ -33,12 +33,13 @@ def check_url(url):
             return False
     except ValueError:
         return False
-
     except requests.exceptions.MissingSchema:
         return False
     except requests.exceptions.ConnectTimeout:
         return False
     except requests.exceptions.ReadTimeout:
+        return False
+    except requests.exceptions.ConnectionError:
         return False
 
 
@@ -178,24 +179,36 @@ def crawl_page(url):
 
 
 def crawl():
-    with stopit.ThreadingTimeout(100) as to_ctx_mgr:
-        assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
+    while True:
+        with stopit.ThreadingTimeout(100) as to_ctx_mgr:
+            assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
 
-        rows = dbm.get_all_rows()
+            rows = dbm.get_all_rows()
 
-        if len(rows) > 0:
-            index = randint(0, len(rows))
-            link = rows[index - 1][0]
+            if len(rows) > 0:
+                index = randint(0, len(rows))
+                link = rows[index - 1][0]
 
-            crawl_page(link)
-        else:
-            crawl_page("https://github.com")
+                crawl_page(link)
+            else:
+                crawl_page("https://github.com")
 
 
+
+
+
+if len(sys.argv) != 2:
+    exit("Usage: python webcrawler.py [amount of threads]")
+
+amount_threads = None
+try:
+    amount_threads = int(sys.argv[1])
+except:
+    exit("Usage: python webcrawler.py [amount of threads]")
 
 threads = list()
 
-for i in range(4):
+for i in range(amount_threads):
     t = threading.Thread(target=crawl, args=[])
     threads.append(t)
 
