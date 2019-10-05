@@ -20,9 +20,25 @@ input {
 .search_bar_div {
   margin-bottom: 3%;
   margin-left: 2%;
-  margin-top: 5%;
+  margin-top: 3%;
 }
 
 p {
   width: 50%;
+}
+
+@media screen and (max-width: 850px) {
+  input {
+    width: 85%;
+  }
+
+  p {
+    width: 90%;
+  }
+
+  .search_bar_div {
+    text-align: center;
+  }
+
+
 }

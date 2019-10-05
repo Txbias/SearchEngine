@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from search import search
 
 
@@ -18,11 +18,11 @@ def query(query):
 
 @app.route("/index.html", methods=["GET"])
 def main():
-    if flask.request.args.get("search") is None:
+    if request.args.get("search") is None:
         return render_template("index.html")
 
-    if flask.request.method == "GET":
-        search_arg = flask.request.args.get("search")
+    if request.method == "GET":
+        search_arg = request.args.get("search")
         returns = search(search_arg, 3)
         if len(returns) > 0:
             responses = list()

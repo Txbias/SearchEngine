@@ -9,13 +9,15 @@
 
     <div class="search_bar_div">
       <form class="search_bar_form" action="index.html" method="get">
-        <input type="text" name="search" value="search"> <br>
+        <input type="text" name="search" > <br>
       </form>
     </div>
 
     <div class="results">
       {% for result in results %}
-            <a href="{{result[0]}}">{{result[1]}}</a> <br>
+            <a class="link" href="{{result[0]}}">{{result[0]}}</a> <br>
+            <a class="title" href="{{result[0]}}">{{result[1]}}</a> <br>
+            <p class="desc">{{result[2]}}</p>
       {% endfor %}
     </div>
   </body>

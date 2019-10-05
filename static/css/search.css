@@ -6,5 +6,13 @@
 
 input {
   font-size: 200%;
-  width: 30%;
+  width: 40%;
+}
+
+@media screen and (max-width: 850px) {
+  input {
+    font-size: 160%;
+    width: 90%;
+  }
+
 }
