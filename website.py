@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request
-from search import search
+from searching import search
 
 
 app = Flask(__name__)
 
 @app.route("/q/<string:query>/")
 def query(query):
-    returns = search(query, 3)
+    returns = search(query, 10)
     if len(returns) > 0:
         responses = list()
         print(len(returns))
@@ -23,7 +23,8 @@ def main():
 
     if request.method == "GET":
         search_arg = request.args.get("search")
-        returns = search(search_arg, 3)
+        print(search_arg)
+        returns = search(search_arg, 10)
         if len(returns) > 0:
             responses = list()
             print(len(returns))

@@ -18,7 +18,6 @@ def search(query, results):
     for i in range(len(rows_as_lists)):
     	values.append(0)
 
-
     index = 0
     for site in rows_as_lists:
         keywords = query.split()
@@ -60,5 +59,4 @@ def search(query, results):
         for i in range(results):
             returns.append(valued_sites[i][0])
 
-        print(returns)
         return returns
