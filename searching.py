@@ -21,17 +21,20 @@ def search(query, results):
 
     index = 0
     for site in rows_as_lists:
-        try:
-            if query.lower() in site[0].lower():
-                values[index] += 1
+        keywords = query.split()
+        keywords.append(query)
+        for keyword in keywords:
+            try:
+                if keyword.lower() in site[0].lower():
+                    values[index] += 1
 
-            if query.lower() in site[1].lower():
-                values[index] += 1
+                if keyword.lower() in site[1].lower():
+                    values[index] += 1
 
-            if query.lower() in site[2].lower():
-                values[index] += 1
-        except AttributeError:
-            pass
+                if keyword.lower() in site[2].lower():
+                    values[index] += 1
+            except AttributeError:
+                pass
 
         index += 1
 
