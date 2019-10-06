@@ -25,7 +25,7 @@ def get_url(domain):
 def check_url(url):
     try:
         r = requests.get(url, timeout=10)
-        if not r.status_code == 404:
+        if not r.status_code == 404 or not r.status_code == 500:
             return True
         else:
             return False
@@ -55,7 +55,7 @@ url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[
 suburl_pattern = re.compile("(/[\w0-9]+)+")
 html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
-user_agent = 'Test'
+user_agent = 'search'
 
 def crawl_page(url):
 
@@ -102,6 +102,9 @@ def crawl_page(url):
         except TypeError:
             pass
 
+    site = dbm.Site(url, title, description, heading_text)
+    dbm.insert_into_sites(site)
+
     index = 0
     for link in links:
         links[index] = link.get('href')
@@ -109,11 +112,12 @@ def crawl_page(url):
 
     links = list(filter(None, links)) # remove empty strings
 
-
+    index = 0
     for link in links:
         if "?" in link: # Found get parameter
-            links.append(link[:link.find("?")]) # Add additional link with no get parameters
+            links[index] = link[:link.find("?")] # Remove get parameters
 
+        index += 1
 
 
     links = list(set(links)) # removing duplicates
@@ -127,16 +131,13 @@ def crawl_page(url):
             links.remove(link)
 
 
+    filtered_links.append(url)
+
     print("Found links: ", len(filtered_links))
     for link in filtered_links:
         if not check_url(link):
             filtered_links.remove(link)
 
-
-
-
-
-    filtered_links.append(url)
 
     sites = list()
 
@@ -150,7 +151,7 @@ def crawl_page(url):
             robots_url = get_url_to_robots(get_url(domain))
             try:
                 robots = Robots.fetch(robots_url)
-                if not robots.allowed(link, user_agent):
+                if not robots.allowed(link, user_agent) and not robots.allowed(link[:-1], user_agent):
                     print("Removed")
                     filtered_links.remove(link)
             except:
@@ -208,7 +209,11 @@ def crawl_page(url):
 
 
     for site in sites:
-        dbm.insert_into_sites(site)
+        try:
+            dbm.insert_into_sites(site)
+        except:
+            print("Exception in line 218")
+            pass
 
     print("Links found: ", len(sites))
 
@@ -230,7 +235,7 @@ def crawl():
 
                 crawl_page(link)
             else:
-                crawl_page("https://github.com")
+                crawl_page("https://www.google.de")
 
         print(len(dbm.get_all_rows()))
 

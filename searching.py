@@ -3,6 +3,12 @@ import operator
 import itertools
 
 
+def replace_special_characters(text):
+
+    text = text.replace("â\x80\x93", "-")
+    return text
+
+
 def search(query, results):
     rows = dbm.get_all_rows()
     rows_as_lists = list()
@@ -21,32 +27,33 @@ def search(query, results):
     index = 0
     for site in rows_as_lists:
         keywords = query.split()
-        keywords.append(query)
+        if not len(keywords) == 1: keywords.append(query)
+
         for keyword in keywords:
             try:
                 if keyword.lower() in site[0].lower(): # link
-                    values[index] += 3
+                    values[index] += 4
 
                 if keyword.lower() in site[1].lower(): # title
-                    values[index] += 2
+                    values[index] += 3
 
                 if keyword.lower() in site[2].lower(): # description
-                    values[index] += 1
+                    values[index] += 2
 
                 if keyword.lower() in site[3].lower(): # headings
                     values[index] += 1
-                    
+
             except AttributeError:
                 pass
 
 
-        if site[0].count('/') <= 1:
-            values[index] += 1
+        if site[0].count('/') <= 2:
+            values[index] += 2
 
         if site[0].count('?') <= 1:
             values[index] += 1
 
-        if site[0].count('.') <= 1:
+        if site[0].count('.') <= 2:
             values[index] += 1
 
         index += 1
@@ -71,6 +78,16 @@ def search(query, results):
 
         returns = list()
         for i in range(results):
-            returns.append(valued_sites[i][0])
+            returns.append(valued_sites[i][0
+
+            
+        big_index = 0
+        for r in returns:
+            small_index = 0
+            for part in r:
+                returns[big_index][small_index] = replace_special_characters(str(part))
+                small_index += 1
+
+            big_index += 1
 
         return returns
