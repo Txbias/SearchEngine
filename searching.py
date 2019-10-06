@@ -32,6 +32,10 @@ def search(query, results):
 
                 if keyword.lower() in site[2].lower(): # description
                     values[index] += 1
+
+                if keyword.lower() in site[3].lower(): # headings
+                    values[index] += 1
+                    
             except AttributeError:
                 pass
 
@@ -40,6 +44,9 @@ def search(query, results):
             values[index] += 1
 
         if site[0].count('?') <= 1:
+            values[index] += 1
+
+        if site[0].count('.') <= 1:
             values[index] += 1
 
         index += 1

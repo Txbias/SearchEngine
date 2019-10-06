@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import re
-#import urllib.request
 import dbmanager as dbm
 from reppy.robots import Robots
 import requests
@@ -54,6 +53,8 @@ dbm.create_table()
 
 url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 suburl_pattern = re.compile("(/[\w0-9]+)+")
+html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+
 user_agent = 'Test'
 
 def crawl_page(url):
@@ -75,6 +76,22 @@ def crawl_page(url):
         title = url
 
     title = str(title).replace("\n", " ")
+
+    headings = soup.find_all('h2')
+    headings.extend(soup.find_all('h3'))
+    headings.extend(soup.find_all('h4'))
+
+    index = 0
+    for heading in headings:
+        headings[index] = re.sub(html_cleanr, '', str(heading))
+        headings[index] = headings[index].strip()
+        index += 1
+
+    heading_text = ""
+    for heading in headings:
+        heading_text += heading + " "
+
+
     metas = soup.find_all('meta')
     description = ""
 
@@ -124,7 +141,10 @@ def crawl_page(url):
     sites = list()
 
     for link in filtered_links:
-        if not link in url:
+        if link in get_url(get_domain(link)):
+            pass
+
+        elif not link in url:
             print("link: ", link)
             domain = get_domain(link)
             robots_url = get_url_to_robots(get_url(domain))
@@ -145,7 +165,7 @@ def crawl_page(url):
             link = link[:link.find("#")]
             filtered_links[index] = link
 
-        content = content = requests.get(link).text     # str(http.request(link)[1]).strip() # content = str(http.request(link)[1]).encode('utf-8').strip().decode()
+        content = content = requests.get(link).text
         soup = BeautifulSoup(content, "html.parser")
         try:
             title = soup.find('title').string
@@ -153,6 +173,22 @@ def crawl_page(url):
             title = url
 
         title = str(title).replace("\n", " ")
+
+        headings = soup.find_all('h2')
+        headings.extend(soup.find_all('h3'))
+        headings.extend(soup.find_all('h4'))
+
+        small_index = 0
+        for heading in headings:
+            headings[index] = re.sub(html_cleanr, '', str(heading))
+            headings[index] = headings[index].strip()
+            small_index += 1
+
+        heading_text = ""
+        for heading in headings:
+            heading_text += str(heading) + " "
+
+
         metas = soup.find_all('meta')
         description = ""
 
@@ -166,7 +202,7 @@ def crawl_page(url):
         if description is None:
             description = ""
 
-        site = dbm.Site(link, title, description)
+        site = dbm.Site(link, title, description, heading_text)
         sites.append(site)
         filtered_links.remove(link)
 

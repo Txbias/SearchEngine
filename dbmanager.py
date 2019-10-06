@@ -5,7 +5,8 @@ def create_table():
     db = sqlite3.connect("data/sites.sqlite")
     cursor = db.cursor()
     cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sites(id INTEGER PRIMARY KEY, link TEXT, title TEXT, description TEXT)
+            CREATE TABLE IF NOT EXISTS sites(id INTEGER PRIMARY KEY, link TEXT, title TEXT, description TEXT,
+            heading TEXT)
     ''')
     db.commit()
     db.close()
@@ -15,8 +16,8 @@ def insert_into_sites(site):
     db = sqlite3.connect("data/sites.sqlite")
     cursor = db.cursor()
     cursor.execute('''
-            INSERT INTO sites(link, title, description) VALUES(?, ?, ?)
-    ''', (site.link, site.title, site.description))
+            INSERT INTO sites(link, title, description, heading) VALUES(?, ?, ?, ?)
+    ''', (site.link, site.title, site.description, site.heading))
 
     db.commit()
     db.close()
@@ -26,7 +27,7 @@ def get_all_rows():
     db = sqlite3.connect("data/sites.sqlite")
     cursor = db.cursor()
     cursor.execute('''
-            SELECT link, title, description FROM sites
+            SELECT link, title, description, heading FROM sites
     ''')
     all_rows = cursor.fetchall()
     db.commit()
@@ -55,8 +56,10 @@ class Site():
     link = ""
     title = ""
     description = ""
+    heading = ""
 
-    def __init__(self, link, title, description):
+    def __init__(self, link, title, description, heading):
         self.link = link
         self.title = title
         self.description = description
+        self.heading = heading
