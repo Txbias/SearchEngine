@@ -1,6 +1,12 @@
 .results {
   margin-left: 2%;
   text-align: left;
+  margin-bottom: 3%;
+}
+
+.desc {
+  margin-bottom: 3.5%;
+  margin-top: 1%;
 }
 
 input {
@@ -10,17 +16,39 @@ input {
 
 .title {
   font-size: 150%;
+  text-decoration: none;
+}
+
+.title:hover {
+  text-decoration: underline;
 }
 
 .link {
   text-decoration: none;
-  color: black;
+  color: green;
+  margin-bottom: 1%;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 .search_bar_div {
   margin-bottom: 3%;
   margin-left: 2%;
   margin-top: 3%;
+}
+
+.result_box {
+  border: none;
+  margin-left: 2px;
+  padding: 2px;
+}
+
+.result_box:hover {
+  background-color: rgba(242, 242, 242, 0.6);
+  margin-left: 2px;
+  padding: 2px;
 }
 
 p {
@@ -39,6 +67,10 @@ p {
   .search_bar_div {
     text-align: center;
   }
+}
 
-
+@media screen and (max-width: 1300px) {
+  input {
+    width: 65%;
+  }
 }

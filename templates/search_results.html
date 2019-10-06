@@ -15,9 +15,11 @@
 
     <div class="results">
       {% for result in results %}
-            <a class="link" href="{{result[0]}}">{{result[0]}}</a> <br>
+          <div class="result_box">
             <a class="title" href="{{result[0]}}">{{result[1]}}</a> <br>
+            <a class="link" href="{{result[0]}}">{{result[0]}}</a> <br>
             <p class="desc">{{result[2]}}</p>
+          </div>
       {% endfor %}
     </div>
   </body>
