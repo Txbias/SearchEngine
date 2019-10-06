@@ -1,4 +1,3 @@
-import httplib2 as hl
 from bs4 import BeautifulSoup
 import re
 import urllib.request
@@ -63,9 +62,7 @@ def crawl_page(url):
         return
 
     domain = get_domain(url)
-    #http = hl.Http()
 
-    #content = str(http.request(url)[1]).strip()
 
     print("Start URL: ", url)
     content = requests.get(url).text
