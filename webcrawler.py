@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import re
-import urllib.request
+#import urllib.request
 import dbmanager as dbm
 from reppy.robots import Robots
 import requests
@@ -93,6 +93,12 @@ def crawl_page(url):
     links = list(filter(None, links)) # remove empty strings
 
 
+    for link in links:
+        if "?" in link: # Found get parameter
+            links.append(link[:link.find("?")]) # Add additional link with no get parameters
+
+
+
     links = list(set(links)) # removing duplicates
     filtered_links = list()
     for link in links:
@@ -111,7 +117,7 @@ def crawl_page(url):
 
 
 
-    #print(filtered_links)
+
 
     filtered_links.append(url)
 
