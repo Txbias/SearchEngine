@@ -78,9 +78,9 @@ def search(query, results):
 
         returns = list()
         for i in range(results):
-            returns.append(valued_sites[i][0
+            returns.append(valued_sites[i][0])
 
-            
+
         big_index = 0
         for r in returns:
             small_index = 0
