@@ -25,15 +25,22 @@ def search(query, results):
         for keyword in keywords:
             try:
                 if keyword.lower() in site[0].lower(): # link
-                    values[index] += 2
+                    values[index] += 3
 
                 if keyword.lower() in site[1].lower(): # title
-                    values[index] += 1
+                    values[index] += 2
 
                 if keyword.lower() in site[2].lower(): # description
                     values[index] += 1
             except AttributeError:
                 pass
+
+
+        if site[0].count('/') <= 1:
+            values[index] += 1
+
+        if site[0].count('?') <= 1:
+            values[index] += 1
 
         index += 1
 
