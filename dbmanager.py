@@ -39,13 +39,8 @@ def remove_duplicates():
     db = sqlite3.connect("data/sites.sqlite")
     cursor = db.cursor()
     cursor.execute('''
-         DELETE FROM sites WHERE rowid not in
-         (
-         select  min(rowid)
-         from    sites
-         group by
-                 link
-         )
+            DELETE FROM sites WHERE rowid NOT IN (SELECT min(rowid) FROM sites
+            GROUP BY link);
     ''')
     db.commit()
     db.close()

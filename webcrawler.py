@@ -189,19 +189,23 @@ def crawl_page(url):
         soup = BeautifulSoup(content, "html.parser")
 
 
-        sites.append(get_site_information(soup, url))
+        sites.append(get_site_information(soup, link))
         filtered_links.remove(link)
 
 
     for site in sites:
         try:
+
             dbm.insert_into_sites(site)
+            print("Added")
         except:
             print("Exception")
 
     print("Links found: ", len(sites))
 
+    print("Before: ", str(len(dbm.get_all_rows())))
     dbm.remove_duplicates()
+    print("After: ", str(len(dbm.get_all_rows())))
 
     index += 1
 
@@ -213,15 +217,18 @@ def crawl():
 
             rows = dbm.get_all_rows()
 
-            if len(rows) > 0:
-                index = randint(0, len(rows))
-                link = rows[index - 1][0]
-
+            if len(rows) > 1:
+                index = randint(0, len(rows) - 1)
+                print("Index: " + str(index))
+                link = rows[index][0]
+                print("random")
                 crawl_page(link)
             else:
                 crawl_page("https://www.google.de")
 
         print(len(dbm.get_all_rows()))
+        rows = dbm.get_all_rows()
+        #print(rows)
 
 
 
