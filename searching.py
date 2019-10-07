@@ -6,6 +6,7 @@ import itertools
 def replace_special_characters(text):
 
     text = text.replace("â\x80\x93", "-")
+    text = text.replace("Ã¼", "ü")
     return text
 
 
@@ -42,6 +43,10 @@ def search(query, results):
 
                 if keyword.lower() in site[3].lower(): # headings
                     values[index] += 1
+
+                if keyword.lower() in site[4].lower(): # paragraphs
+                    values[index] += int(site[4].lower().count(keyword.lower()) / 2)
+
 
             except AttributeError:
                 pass

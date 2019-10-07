@@ -8,6 +8,12 @@ from random import randint
 import sys
 import stopit
 
+url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+suburl_pattern = re.compile("(/[\w0-9]+)+")
+html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+
+user_agent = 'search'
+
 
 def get_url_to_robots(url):
     if str(url).endswith("/"):
@@ -49,27 +55,7 @@ def get_domain(url):
     return url
 
 
-dbm.create_table()
-
-url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
-suburl_pattern = re.compile("(/[\w0-9]+)+")
-html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
-
-user_agent = 'search'
-
-def crawl_page(url):
-
-    if not check_url(url):
-        return
-
-    domain = get_domain(url)
-
-
-    print("Start URL: ", url)
-    content = requests.get(url).text
-
-    soup = BeautifulSoup(content, "html.parser")
-    links = soup.find_all('a')
+def get_site_information(soup, url):
     try:
         title = soup.find('title').string
     except AttributeError:
@@ -92,6 +78,19 @@ def crawl_page(url):
         heading_text += heading + " "
 
 
+    paragraphs = soup.find_all('p')
+    p_text = ""
+
+    for p in paragraphs:
+        p_text += str(p)
+
+    p_text = re.sub(html_cleanr, '', p_text)
+    p_text = " ".join(p_text.split())
+
+    if len(p_text) > 700:
+        p_text = p_text[:700]
+
+
     metas = soup.find_all('meta')
     description = ""
 
@@ -102,8 +101,29 @@ def crawl_page(url):
         except TypeError:
             pass
 
-    site = dbm.Site(url, title, description, heading_text)
-    dbm.insert_into_sites(site)
+    site = dbm.Site(url, title, description, heading_text, p_text)
+
+    return site
+
+
+dbm.create_table()
+
+def crawl_page(url):
+
+    if not check_url(url):
+        return
+
+    domain = get_domain(url)
+
+
+    print("Start URL: ", url)
+    content = requests.get(url).text
+
+    soup = BeautifulSoup(content, "html.parser")
+
+    dbm.insert_into_sites(get_site_information(soup, url))
+
+    links = soup.find_all('a')
 
     index = 0
     for link in links:
@@ -146,16 +166,15 @@ def crawl_page(url):
             pass
 
         elif not link in url:
-            print("link: ", link)
             domain = get_domain(link)
             robots_url = get_url_to_robots(get_url(domain))
             try:
                 robots = Robots.fetch(robots_url)
                 if not robots.allowed(link, user_agent) and not robots.allowed(link[:-1], user_agent):
-                    print("Removed")
                     filtered_links.remove(link)
+                else:
+                    print("link: ", link)
             except:
-                print("Removed")
                 filtered_links.remove(link)
 
 
@@ -168,43 +187,9 @@ def crawl_page(url):
 
         content = content = requests.get(link).text
         soup = BeautifulSoup(content, "html.parser")
-        try:
-            title = soup.find('title').string
-        except AttributeError:
-            title = url
-
-        title = str(title).replace("\n", " ")
-
-        headings = soup.find_all('h2')
-        headings.extend(soup.find_all('h3'))
-        headings.extend(soup.find_all('h4'))
-
-        small_index = 0
-        for heading in headings:
-            headings[index] = re.sub(html_cleanr, '', str(heading))
-            headings[index] = headings[index].strip()
-            small_index += 1
-
-        heading_text = ""
-        for heading in headings:
-            heading_text += str(heading) + " "
 
 
-        metas = soup.find_all('meta')
-        description = ""
-
-        for meta in metas:
-            try:
-                if "description" in meta.get('name'):
-                    description = meta.get('content')
-            except TypeError:
-                pass
-
-        if description is None:
-            description = ""
-
-        site = dbm.Site(link, title, description, heading_text)
-        sites.append(site)
+        sites.append(get_site_information(soup, url))
         filtered_links.remove(link)
 
 
@@ -212,8 +197,7 @@ def crawl_page(url):
         try:
             dbm.insert_into_sites(site)
         except:
-            print("Exception in line 218")
-            pass
+            print("Exception")
 
     print("Links found: ", len(sites))
 
