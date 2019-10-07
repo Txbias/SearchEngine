@@ -137,6 +137,8 @@ def crawl_page(url):
         if "?" in link: # Found get parameter
             links[index] = link[:link.find("?")] # Remove get parameters
 
+        if "%" in link:
+            links[index] = link[:link.find('%')]
         index += 1
 
 
@@ -197,15 +199,12 @@ def crawl_page(url):
         try:
 
             dbm.insert_into_sites(site)
-            print("Added")
         except:
             print("Exception")
 
     print("Links found: ", len(sites))
 
-    print("Before: ", str(len(dbm.get_all_rows())))
     dbm.remove_duplicates()
-    print("After: ", str(len(dbm.get_all_rows())))
 
     index += 1
 
@@ -219,16 +218,13 @@ def crawl():
 
             if len(rows) > 1:
                 index = randint(0, len(rows) - 1)
-                print("Index: " + str(index))
                 link = rows[index][0]
-                print("random")
                 crawl_page(link)
             else:
                 crawl_page("https://www.google.de")
 
         print(len(dbm.get_all_rows()))
         rows = dbm.get_all_rows()
-        #print(rows)
 
 
 
