@@ -222,7 +222,14 @@ def crawl():
             print("sites: " + str(len(sites_rows)))
             links = list()
             for row in sites_rows:
-                dbm.insert_into_crawl(str(row[0]))
+                for i in range(100): # trys it 100 times
+                    try:
+                        dbm.insert_into_crawl(str(row[0]))
+                        break
+                    except dbm.sqlite3.OperationalError:
+                        pass
+
+
 
 
         with stopit.ThreadingTimeout(100) as to_ctx_mgr:
@@ -239,7 +246,7 @@ def crawl():
             else:
                 crawl_page("https://www.google.de")
 
-        print("Total found sites" + len(dbm.get_all_rows("sites")))
+        print("Total found sites" + str(len(dbm.get_all_rows("sites"))))
 
 
 
