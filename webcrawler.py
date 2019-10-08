@@ -106,7 +106,7 @@ def get_site_information(soup, url):
     return site
 
 
-dbm.create_table()
+dbm.create_tables()
 
 def crawl_page(url):
 
@@ -132,15 +132,6 @@ def crawl_page(url):
 
     links = list(filter(None, links)) # remove empty strings
 
-    index = 0
-    for link in links:
-        if "?" in link: # Found get parameter
-            links[index] = link[:link.find("?")] # Remove get parameters
-
-        if "%" in link:
-            links[index] = link[:link.find('%')]
-        index += 1
-
 
     links = list(set(links)) # removing duplicates
     filtered_links = list()
@@ -152,10 +143,23 @@ def crawl_page(url):
             filtered_links.append(url + link)
             links.remove(link)
 
+    index = 0
+    for link in filtered_links:
+        if "?" in link: # Found get parameter
+            filtered_links[index] = link[:link.find("?")] # Remove get parameters
+        else:
+            pass
+
+        if "#" in link:
+            link = link[:link.find("#")]
+            filtered_links[index] = link
+
+        index += 1
+
 
     filtered_links.append(url)
 
-    print("Found links: ", len(filtered_links))
+    print("Links found: ", len(filtered_links))
     for link in filtered_links:
         if not check_url(link):
             filtered_links.remove(link)
@@ -172,8 +176,14 @@ def crawl_page(url):
             robots_url = get_url_to_robots(get_url(domain))
             try:
                 robots = Robots.fetch(robots_url)
-                if not robots.allowed(link, user_agent) and not robots.allowed(link[:-1], user_agent):
-                    filtered_links.remove(link)
+                if not robots.allowed(link, user_agent):
+                    if link.endswith("/"):
+                        if robots.allowed(link[:-1].allowed(link[:-1], user_agent)):
+                            pass
+                        else:
+                            filtered_links.remove(link)
+                    else:
+                        filtered_links.remove(link)
                 else:
                     print("link: ", link)
             except:
@@ -182,11 +192,6 @@ def crawl_page(url):
 
     index = 0
     for link in filtered_links:
-
-        if "#" in link:
-            link = link[:link.find("#")]
-            filtered_links[index] = link
-
         content = content = requests.get(link).text
         soup = BeautifulSoup(content, "html.parser")
 
@@ -197,7 +202,6 @@ def crawl_page(url):
 
     for site in sites:
         try:
-
             dbm.insert_into_sites(site)
         except:
             print("Exception")
@@ -211,20 +215,32 @@ def crawl_page(url):
 
 def crawl():
     while True:
+
+        crawl_rows = dbm.get_all_rows("crawl")
+        if len(crawl_rows) < 2:
+            sites_rows = dbm.get_all_rows("sites")
+            print("sites: " + str(len(sites_rows)))
+            links = list()
+            for row in sites_rows:
+                dbm.insert_into_crawl(str(row[0]))
+
+
         with stopit.ThreadingTimeout(100) as to_ctx_mgr:
             assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
 
-            rows = dbm.get_all_rows()
+            rows = dbm.get_all_rows("crawl")
+            print("URLS in crawl memory: " + str(len(rows)))
 
             if len(rows) > 1:
                 index = randint(0, len(rows) - 1)
-                link = rows[index][0]
-                crawl_page(link)
+                link = rows[index]
+                crawl_page(link[0])
+                dbm.delete_from_crawl(link[0])
             else:
                 crawl_page("https://www.google.de")
 
-        print(len(dbm.get_all_rows()))
-        rows = dbm.get_all_rows()
+        print("Total found sites" + len(dbm.get_all_rows("sites")))
+
 
 
 

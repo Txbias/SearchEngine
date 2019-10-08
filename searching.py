@@ -11,7 +11,7 @@ def replace_special_characters(text):
 
 
 def search(query, results):
-    rows = dbm.get_all_rows()
+    rows = dbm.get_all_rows("sites")
     rows_as_lists = list()
 
     for row in rows:
