@@ -7,6 +7,8 @@ import threading
 from random import randint
 import sys
 import stopit
+import time
+
 
 url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 suburl_pattern = re.compile("(/[\w0-9]+)+")
@@ -140,15 +142,17 @@ def crawl_page(url):
             filtered_links.append(link)
             links.remove(link)
         elif suburl_pattern.match(link):
-            filtered_links.append(url + link)
+            if str(link).startswith("/") and url.endswith("/"):
+                filtered_links.append(url[:-1] + link)
+            else:
+                filtered_links.append(url + link)
+
             links.remove(link)
 
     index = 0
     for link in filtered_links:
         if "?" in link: # Found get parameter
             filtered_links[index] = link[:link.find("?")] # Remove get parameters
-        else:
-            pass
 
         if "#" in link:
             link = link[:link.find("#")]
@@ -241,12 +245,12 @@ def crawl():
             if len(rows) > 1:
                 index = randint(0, len(rows) - 1)
                 link = rows[index]
-                crawl_page(link[0])
                 dbm.delete_from_crawl(link[0])
+                crawl_page(link[0])
             else:
-                crawl_page("https://www.google.de")
+                crawl_page("https://Github.com")
 
-        print("Total found sites" + str(len(dbm.get_all_rows("sites"))))
+        print("Total found sites: " + str(len(dbm.get_all_rows("sites"))))
 
 
 
@@ -273,3 +277,4 @@ for thread in threads:
     index += 1
     thread.start()
     print("Started Thread ", index)
+    time.sleep(2)
