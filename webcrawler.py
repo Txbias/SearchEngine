@@ -57,7 +57,15 @@ def get_domain(url):
     return url
 
 
-def get_site_information(soup, url):
+def get_site_information(url):
+
+    starttime = time.time()
+    content = requests.get(url).text
+    endtime = time.time()
+    totaltime = round(endtime - starttime, 3)
+
+    soup = BeautifulSoup(content, "html.parser")
+
     try:
         title = soup.find('title').string
     except AttributeError:
@@ -103,7 +111,7 @@ def get_site_information(soup, url):
         except TypeError:
             pass
 
-    site = dbm.Site(url, title, description, heading_text, p_text)
+    site = dbm.Site(url, title, description, heading_text, p_text, totaltime)
 
     return site
 
@@ -117,13 +125,15 @@ def crawl_page(url):
 
     domain = get_domain(url)
 
-
-    print("Start URL: ", url)
     content = requests.get(url).text
-
     soup = BeautifulSoup(content, "html.parser")
 
-    dbm.insert_into_sites(get_site_information(soup, url))
+    print("Start URL: ", url)
+
+    try:
+        dbm.insert_into_sites(get_site_information(url))
+    except:
+        pass
 
     links = soup.find_all('a')
 
@@ -196,11 +206,8 @@ def crawl_page(url):
 
     index = 0
     for link in filtered_links:
-        content = content = requests.get(link).text
-        soup = BeautifulSoup(content, "html.parser")
 
-
-        sites.append(get_site_information(soup, link))
+        sites.append(get_site_information(link))
         filtered_links.remove(link)
 
 

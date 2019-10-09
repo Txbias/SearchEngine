@@ -52,6 +52,9 @@ def search(query, results):
                 pass
 
 
+        if float(site[5]) < 2: # answer time
+            values[index] += 1
+
         if site[0].count('/') <= 2:
             values[index] += 2
 
@@ -60,6 +63,13 @@ def search(query, results):
 
         if site[0].count('.') <= 2:
             values[index] += 1
+
+
+        if len(site[2]) == 0:
+            if len(site[4]) >= 120:
+                site[2] = site[4][:120] + "..."
+            else:
+                site[2] = site[4]
 
         index += 1
 
