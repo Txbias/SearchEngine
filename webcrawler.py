@@ -4,7 +4,7 @@ import dbmanager as dbm
 from reppy.robots import Robots
 import requests
 import threading
-from random import randint
+import random
 import sys
 import stopit
 import time
@@ -111,7 +111,13 @@ def get_site_information(url):
         except TypeError:
             pass
 
-    site = dbm.Site(url, title, description, heading_text, p_text, totaltime)
+    all_rows = dbm.get_all_rows("sites")
+    times_found = 0
+    for row in all_rows:
+        if url in row[0][0]:
+            times_found = int(row[0][6] + 1)
+
+    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found)
 
     return site
 
@@ -153,9 +159,9 @@ def crawl_page(url):
             links.remove(link)
         elif suburl_pattern.match(link):
             if str(link).startswith("/") and url.endswith("/"):
-                filtered_links.append(url[:-1] + link)
+                filtered_links.append(get_url(get_domain(url[:-1])) + link)
             else:
-                filtered_links.append(url + link)
+                filtered_links.append(get_url(get_domain(url)) + link)
 
             links.remove(link)
 
@@ -250,38 +256,40 @@ def crawl():
             print("URLS in crawl memory: " + str(len(rows)))
 
             if len(rows) > 1:
-                index = randint(0, len(rows) - 1)
+                index = random.randint(0, len(rows) - 1)
                 link = rows[index]
                 dbm.delete_from_crawl(link[0])
                 crawl_page(link[0])
             else:
-                crawl_page("https://Github.com")
+                crawl_pages = ["https://www.Gitub.com", "https://twitter.com", "https://google.de", "https://leo.org",
+                               "https://wikipedia.org"]
+                crawl_page(random.choice(crawl_pages))
 
         print("Total found sites: " + str(len(dbm.get_all_rows("sites"))))
 
 
 
 
+if __name__ == "__main__":
 
+    if len(sys.argv) != 2:
+        exit("Usage: python webcrawler.py [amount of threads]")
 
-if len(sys.argv) != 2:
-    exit("Usage: python webcrawler.py [amount of threads]")
+    amount_threads = None
+    try:
+        amount_threads = int(sys.argv[1])
+    except:
+        exit("Usage: python webcrawler.py [amount of threads]")
 
-amount_threads = None
-try:
-    amount_threads = int(sys.argv[1])
-except:
-    exit("Usage: python webcrawler.py [amount of threads]")
+    threads = list()
 
-threads = list()
+    for i in range(amount_threads):
+        t = threading.Thread(target=crawl, args=[])
+        threads.append(t)
 
-for i in range(amount_threads):
-    t = threading.Thread(target=crawl, args=[])
-    threads.append(t)
-
-index = 0
-for thread in threads:
-    index += 1
-    thread.start()
-    print("Started Thread ", index)
-    time.sleep(2)
+    index = 0
+    for thread in threads:
+        index += 1
+        thread.start()
+        print("Started Thread ", index)
+        time.sleep(2)

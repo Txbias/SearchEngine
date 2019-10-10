@@ -7,6 +7,9 @@ def replace_special_characters(text):
 
     text = text.replace("â\x80\x93", "-")
     text = text.replace("Ã¼", "ü")
+    text = text.replace("â\x80\x94", "—")
+    text = text.replace("â\x80\x9d", "\"")
+    text = text.replace("â\x80\x9c", "\"")
     return text
 
 
@@ -29,6 +32,15 @@ def search(query, results):
     for site in rows_as_lists:
         keywords = query.split()
         if not len(keywords) == 1: keywords.append(query)
+
+        if not site[2] is None:
+            if len(site[2]) == 0:
+                if len(site[4]) >= 120:
+                    site[2] = site[4][:120] + "..."
+                else:
+                    rows_as_lists[index][2] = rows_as_lists[index][4]
+        else:
+            rows_as_lists[index][2] = rows_as_lists[index][4]
 
         for keyword in keywords:
             try:
@@ -64,12 +76,12 @@ def search(query, results):
         if site[0].count('.') <= 2:
             values[index] += 1
 
+        if int(site[6]) > 0: # times found
+            values[index] += int(site[6] / 2)
 
-        if len(site[2]) == 0:
-            if len(site[4]) >= 120:
-                site[2] = site[4][:120] + "..."
-            else:
-                site[2] = site[4]
+
+        if len(site[2]) > 120:
+            rows_as_lists[index][2] = site[2][:120]
 
         index += 1
 
@@ -104,5 +116,7 @@ def search(query, results):
                 small_index += 1
 
             big_index += 1
+
+        print(returns)
 
         return returns
