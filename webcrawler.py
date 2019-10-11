@@ -168,11 +168,13 @@ def crawl_page(url):
     index = 0
     for link in filtered_links:
         if "?" in link: # Found get parameter
-            filtered_links[index] = link[:link.find("?")] # Remove get parameters
+            filtered_links[index] = filtered_links[index][:filtered_links[index].find("?")] # Remove get parameters
 
         if "#" in link:
-            link = link[:link.find("#")]
-            filtered_links[index] = link
+            filtered_links[index] = filtered_links[index][:filtered_links[index].find("#")]
+
+        if "%" in link:
+            filtered_links[index] = filtered_links[index][:filtered_links[index].find("%")]
 
         index += 1
 
