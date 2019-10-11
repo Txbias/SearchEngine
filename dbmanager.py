@@ -8,6 +8,11 @@ def create_tables():
             CREATE TABLE IF NOT EXISTS sites(link TEXT, title TEXT, description TEXT, heading TEXT,
             paragraph TEXT, answer_time TEXT, times_found TEXT, language TEXT)
     ''')
+    db.commit()
+    db.close()
+
+    db = sqlite3.connect("data/crawl.sqlite")
+    cursor = db.cursor()
     cursor.execute('''
             CREATE TABLE IF NOT EXISTS crawl(link TEXT)
     ''')
@@ -27,7 +32,7 @@ def insert_into_sites(site):
 
 
 def insert_into_crawl(link):
-    db = sqlite3.connect("data/sites.sqlite")
+    db = sqlite3.connect("data/crawl.sqlite")
     cursor = db.cursor()
     cursor.execute('''
             INSERT INTO crawl(link) VALUES(?)
@@ -37,14 +42,18 @@ def insert_into_crawl(link):
 
 
 def get_all_rows(table):
-    db = sqlite3.connect("data/sites.sqlite")
-    cursor = db.cursor()
+    db = None
+    cursor = None
 
     if "sites" in table:
+        db = sqlite3.connect("data/sites.sqlite")
+        cursor = db.cursor()
         cursor.execute('''
                 SELECT link, title, description, heading, paragraph, answer_time, times_found, language FROM sites
         ''')
     elif "crawl" in table:
+        db = sqlite3.connect("data/crawl.sqlite")
+        cursor = db.cursor()
         cursor.execute('''
                 SELECT link FROM crawl
         ''')
@@ -61,6 +70,11 @@ def remove_duplicates():
             DELETE FROM sites WHERE rowid NOT IN (SELECT min(rowid) FROM sites
             GROUP BY link);
     ''')
+    db.commit()
+    db.close()
+
+    db = sqlite3.connect("data/crawl.sqlite")
+    cursor = db.cursor()
     cursor.execute('''
             DELETE FROM crawl WHERE rowid NOT IN (SELECT min(rowid) FROM crawl
             GROUP BY link);
@@ -70,7 +84,7 @@ def remove_duplicates():
 
 
 def delete_from_crawl(link):
-    db = sqlite3.connect("data/sites.sqlite")
+    db = sqlite3.connect("data/crawl.sqlite")
     cursor = db.cursor()
     cursor.execute('''
             DELETE FROM crawl WHERE link = ?
