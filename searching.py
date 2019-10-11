@@ -10,10 +10,13 @@ def replace_special_characters(text):
     text = text.replace("â\x80\x94", "—")
     text = text.replace("â\x80\x9d", "\"")
     text = text.replace("â\x80\x9c", "\"")
+    text = text.replace("Ã¶", "ö")
+    text = text.replace("Ã¤", "ä")
     return text
 
 
 def search(query, results):
+    current_lang = "de"
     rows = dbm.get_all_rows("sites")
     rows_as_lists = list()
 
@@ -66,6 +69,9 @@ def search(query, results):
 
         if float(site[5]) < 2: # answer time
             values[index] += 1
+
+        if site[6] == current_lang:
+            values[index] += 2
 
         if site[0].count('/') <= 2:
             values[index] += 2

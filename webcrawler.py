@@ -117,7 +117,17 @@ def get_site_information(url):
         if url in row[0][0]:
             times_found = int(row[0][6] + 1)
 
-    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found)
+    html_tag = soup.find("html")
+    language = ""
+    try:
+        language = html_tag.get("lang")
+    except:
+        pass
+
+    if language is None:
+        language = " "
+
+    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found, language)
 
     return site
 
