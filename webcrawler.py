@@ -137,16 +137,17 @@ def get_site_information(url):
     return site
 
 
-dbm.create_tables()
-
 def crawl_page(url):
 
     if not check_url(url):
         return
 
     domain = get_domain(url)
+    try:
+        content = requests.get(url).text
+    except requests.exceptions.ConnectionError:
+        return
 
-    content = requests.get(url).text
     soup = BeautifulSoup(content, "html.parser")
 
     print("Start URL: ", url)
@@ -227,8 +228,9 @@ def crawl_page(url):
                 filtered_links.remove(link)
 
 
-    index = 0
     for link in filtered_links:
+        if link in get_url(get_domain(link)) + str("/sitemap"):
+            continue
 
         sites.append(get_site_information(link))
         filtered_links.remove(link)
@@ -244,7 +246,6 @@ def crawl_page(url):
 
     dbm.remove_duplicates()
 
-    index += 1
 
 
 def crawl():
@@ -288,6 +289,7 @@ def crawl():
 
 
 if __name__ == "__main__":
+    dbm.create_tables()
 
     if len(sys.argv) != 2:
         exit("Usage: python webcrawler.py [amount of threads]")

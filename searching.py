@@ -73,7 +73,7 @@ def search(query, results):
         if site[6] == current_lang:
             values[index] += 2
 
-        if site[0].count('/') <= 2:
+        if site[0].count('/') <= 3:
             values[index] += 2
 
         if site[0].count('?') <= 1:
