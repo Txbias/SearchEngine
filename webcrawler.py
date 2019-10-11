@@ -73,9 +73,11 @@ def get_site_information(url):
 
     title = str(title).replace("\n", " ")
 
-    headings = soup.find_all('h2')
+    headings = soup.find_all('h1')
+    headings.extend(soup.find_all('h2'))
     headings.extend(soup.find_all('h3'))
     headings.extend(soup.find_all('h4'))
+    headings.extend(soup.find_all('h5'))
 
     index = 0
     for heading in headings:
@@ -86,6 +88,9 @@ def get_site_information(url):
     heading_text = ""
     for heading in headings:
         heading_text += heading + " "
+
+    if len(heading_text) > 700:
+        heading_text = heading_text[:700]
 
 
     paragraphs = soup.find_all('p')
