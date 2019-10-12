@@ -8,6 +8,7 @@ import random
 import sys
 import stopit
 import time
+from datetime import datetime
 
 
 url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
@@ -15,7 +16,7 @@ suburl_pattern = re.compile("(/[\w0-9]+)+")
 html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
 user_agent = 'search'
-
+date_format = "%m/%d/%Y"
 
 def get_url_to_robots(url):
     if str(url).endswith("/"):
@@ -56,6 +57,14 @@ def get_domain(url):
 
     return url
 
+
+def isExisting(link, rows):
+    return_value = False
+    for row in rows:
+        if link in row[0][0]:
+            return_value = True
+
+    return return_value
 
 def get_site_information(url):
 
@@ -116,12 +125,6 @@ def get_site_information(url):
         except TypeError:
             pass
 
-    all_rows = dbm.get_all_rows("sites")
-    times_found = 0
-    for row in all_rows:
-        if url in row[0][0]:
-            times_found = int(row[0][6] + 1)
-
     html_tag = soup.find("html")
     language = ""
     try:
@@ -132,7 +135,17 @@ def get_site_information(url):
     if language is None:
         language = " "
 
-    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found, language)
+    datestring = time.strftime(date_format, time.gmtime())
+
+
+    all_rows = dbm.get_all_rows("sites")
+    times_found = 0
+    for row in all_rows:
+        if url in row[0][0]:
+            times_found = int(row[0][6] + 1)
+
+
+    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found, language, datestring)
 
     return site
 
@@ -151,11 +164,18 @@ def crawl_page(url):
     soup = BeautifulSoup(content, "html.parser")
 
     print("Start URL: ", url)
-
-    try:
-        dbm.insert_into_sites(get_site_information(url))
-    except:
-        pass
+    site = get_site_information(url)
+    rows = dbm.get_all_rows("sites")
+    for i in range(100):
+        try:
+            if isExisting(site.link, rows):
+                dbm.update_column(site)
+                break;
+            else:
+                dbm.insert_into_sites(site)
+                break;
+        except:
+            pass
 
     links = soup.find_all('a')
 
@@ -229,18 +249,25 @@ def crawl_page(url):
 
 
     for link in filtered_links:
-        if link in get_url(get_domain(link)) + str("/sitemap"):
+        if get_url(get_domain(link)) + str("/sitemap") in link:
+            print(1)
             continue
 
         sites.append(get_site_information(link))
         filtered_links.remove(link)
 
-
+    rows = dbm.get_all_rows("sites")
     for site in sites:
-        try:
-            dbm.insert_into_sites(site)
-        except:
-            print("Exception")
+        for i in range(100):
+            try:
+                if isExisting(site.link, rows):
+                    dbm.update_column(site)
+                    break;
+                else:
+                    dbm.insert_into_sites(site)
+                    break;
+            except:
+                print("Exception")
 
     print("Links found: ", len(sites))
 
