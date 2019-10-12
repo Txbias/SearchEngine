@@ -282,7 +282,8 @@ def crawl():
         if len(crawl_rows) < 2:
             sites_rows = dbm.get_all_rows("sites")
             print("sites: " + str(len(sites_rows)))
-            links = list()
+            sites_rows.sort(key=lambda row: datetime.strptime(row[8], date_format)) # Sort by date
+            sites_rows = sites_rows[:400] # Get the 400 oldest links
             for row in sites_rows:
                 for i in range(100): # trys it 100 times
                     try:
