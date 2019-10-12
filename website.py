@@ -24,7 +24,7 @@ def main():
     if request.method == "GET":
         search_arg = request.args.get("search")
         print(search_arg)
-        returns = search(search_arg, 10)
+        returns = search(search_arg, 10, "de")
         if len(returns) > 0:
             responses = list()
             print(len(returns))

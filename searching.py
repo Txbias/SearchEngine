@@ -15,8 +15,7 @@ def replace_special_characters(text):
     return text
 
 
-def search(query, results):
-    current_lang = "de"
+def search(query, results, current_lang):
     rows = dbm.get_all_rows("sites")
     rows_as_lists = list()
 
@@ -45,13 +44,18 @@ def search(query, results):
         else:
             rows_as_lists[index][2] = rows_as_lists[index][4]
 
+
+        inTitle = False
+        inLink = False
         for keyword in keywords:
             try:
                 if keyword.lower() in site[0].lower(): # link
                     values[index] += 4
+                    inLink = True
 
                 if keyword.lower() in site[1].lower(): # title
-                    values[index] += 3
+                    values[index] += 4
+                    inTitle = True
 
                 if keyword.lower() in site[2].lower(): # description
                     values[index] += 2
@@ -70,11 +74,14 @@ def search(query, results):
         if float(site[5]) < 2: # answer time
             values[index] += 1
 
-        if site[6] == current_lang:
-            values[index] += 2
+        if site[6] == current_lang: # language
+            values[index] += 3
 
         if site[0].count('/') <= 3:
-            values[index] += 2
+            if inTitle or inLink:
+                values[index] += 4
+            else:
+                values[index] += 2
 
         if site[0].count('?') <= 1:
             values[index] += 1
@@ -83,7 +90,10 @@ def search(query, results):
             values[index] += 1
 
         if int(site[6]) > 0: # times found
-            values[index] += int(site[6] / 2)
+            if inTitle or inLink:
+                values[index] += int(site[6] / 2)
+            else:
+                values[index] += int(site[6] / 5)
 
 
         if len(site[2]) > 120:
