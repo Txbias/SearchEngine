@@ -106,6 +106,10 @@ def search(query, results, current_lang):
         if len(site[2]) > 120:
             rows_as_lists[index][2] = site[2][:120]
 
+        if len(site[1]) > 118:
+            rows_as_lists[index][1] = site[1][:115] + "..."
+            if values[index] > 0:
+                values[index] -= 1
         index += 1
 
 
