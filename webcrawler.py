@@ -77,11 +77,16 @@ def isExisting(link, rows):
     return return_value
 
 def get_site_information(url):
+    for i in range(100):
+        try:
+            starttime = time.time()
+            content = requests.get(url).text
+            endtime = time.time()
+            totaltime = round(endtime - starttime, 3)
+            break
+        except requests.exceptions.ConnectionError:
+            pass
 
-    starttime = time.time()
-    content = requests.get(url).text
-    endtime = time.time()
-    totaltime = round(endtime - starttime, 3)
 
     soup = BeautifulSoup(content, "html.parser")
 
