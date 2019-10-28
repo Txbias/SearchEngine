@@ -9,7 +9,7 @@ import sys
 import stopit
 import time
 from datetime import datetime
-import utis
+import utils
 
 
 url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
