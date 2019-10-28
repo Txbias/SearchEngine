@@ -256,6 +256,20 @@ def crawl_page(url):
         sites.append(get_site_information(link))
         filtered_links.remove(link)
 
+    # Adding all sites to the db in a seperate thread
+    threading.Thread(target=insert_into_db, args=(sites, )).start()
+    print("Links found: ", len(sites))
+
+    if len(sites) > 0:
+        with stopit.ThreadingTimeout(100) as to_ctx_mgr:
+            assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
+            choice = random.choice(sites).link
+            if not choice == url:
+                crawl_page(choice)
+
+
+def insert_into_db(sites):
+    print("Inserting")
     rows = dbm.get_all_rows("sites")
     for site in sites:
         for i in range(100):
@@ -268,8 +282,6 @@ def crawl_page(url):
                     break
             except:
                 print("Exception")
-
-    print("Links found: ", len(sites))
 
     dbm.remove_duplicates()
 
@@ -293,23 +305,18 @@ def crawl():
                         pass
 
 
+        rows = dbm.get_all_rows("crawl")
+        print("URLS in crawl memory: " + str(len(rows)))
 
-
-        with stopit.ThreadingTimeout(100) as to_ctx_mgr:
-            assert to_ctx_mgr.state == to_ctx_mgr.EXECUTING
-
-            rows = dbm.get_all_rows("crawl")
-            print("URLS in crawl memory: " + str(len(rows)))
-
-            if len(rows) > 1:
-                index = random.randint(0, len(rows) - 1)
-                link = rows[index]
-                dbm.delete_from_crawl(link[0])
-                crawl_page(link[0])
-            else:
-                crawl_pages = ["https://www.Gitub.com", "https://twitter.com", "https://google.de", "https://leo.org",
-                               "https://wikipedia.org"]
-                crawl_page(random.choice(crawl_pages))
+        if len(rows) > 1:
+            index = random.randint(0, len(rows) - 1)
+            link = rows[index]
+            dbm.delete_from_crawl(link[0])
+            crawl_page(link[0])
+        else:
+            crawl_pages = ["https://www.Gitub.com", "https://twitter.com", "https://google.de", "https://leo.org",
+                              "https://wikipedia.org"]
+            crawl_page(random.choice(crawl_pages))
 
         print("Total found sites: " + str(len(dbm.get_all_rows("sites"))))
 
