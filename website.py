@@ -29,7 +29,7 @@ def main():
             responses = list()
             print(len(returns))
 
-            return render_template('search_results.html', results=returns)
+            return render_template('search_results.html', results=returns, search=search_arg)
         else:
             return "No Sites found!"
 
