@@ -170,10 +170,10 @@ def crawl_page(url):
         try:
             if isExisting(site.link, rows):
                 dbm.update_column(site)
-                break;
+                break
             else:
                 dbm.insert_into_sites(site)
-                break;
+                break
         except:
             pass
 
@@ -262,10 +262,10 @@ def crawl_page(url):
             try:
                 if isExisting(site.link, rows):
                     dbm.update_column(site)
-                    break;
+                    break
                 else:
                     dbm.insert_into_sites(site)
-                    break;
+                    break
             except:
                 print("Exception")
 

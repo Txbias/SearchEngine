@@ -28,7 +28,7 @@ def insert_into_sites(site):
     ''', (site.link, site.title, site.description, site.heading, site.paragraph, site.answer_time, site.times_found, site.language, site.date))
 
     db.commit()
-    db.close
+    db.close()
 
 
 def update_column(site):
