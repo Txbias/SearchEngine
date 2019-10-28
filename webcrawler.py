@@ -9,6 +9,7 @@ import sys
 import stopit
 import time
 from datetime import datetime
+import utis
 
 
 url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
@@ -30,11 +31,20 @@ def get_url_to_robots(url):
 def get_url(domain):
     return "https://" + domain
 
+def get_hostname(domain):
+
+    domain = domain[:domain.rfind(".")] # Remove top level get_domain
+    while "." in domain:
+        domain = domain[domain.find(".") + 1:]
+
+    return domain
+
+
 
 def check_url(url):
     try:
         r = requests.get(url, timeout=10)
-        if not r.status_code == 404 or not r.status_code == 500:
+        if not r.status_code == 404 or not r.status_code == 500 or not r.status_code == 403 or not r.status_code == 502:
             return True
         else:
             return False
@@ -137,8 +147,13 @@ def get_site_information(url):
 
     datestring = time.strftime(date_format, time.gmtime())
 
+    for i in range(100):
+        try:
+            all_rows = dbm.get_all_rows("sites")
+            break
+        except:
+            pass
 
-    all_rows = dbm.get_all_rows("sites")
     times_found = 0
     for row in all_rows:
         if url in row[0][0]:
@@ -277,6 +292,14 @@ def insert_into_db(sites):
                 if isExisting(site.link, rows):
                     dbm.update_column(site)
                     break
+                elif isExisting(site.link + "/", rows):
+                    site.link = site.link + "/"
+                    dbm.update_column(site)
+                    break
+                elif isExisting(site.link[:-1], rows):
+                    site.link = site.link[:-1]
+                    dbm.update_column(site)
+                    break
                 else:
                     dbm.insert_into_sites(site)
                     break
@@ -313,6 +336,7 @@ def crawl():
             link = rows[index]
             dbm.delete_from_crawl(link[0])
             crawl_page(link[0])
+
         else:
             crawl_pages = ["https://www.Gitub.com", "https://twitter.com", "https://google.de", "https://leo.org",
                               "https://wikipedia.org"]
