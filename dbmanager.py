@@ -101,6 +101,16 @@ def delete_from_crawl(link):
     db.close()
 
 
+def delete_from_sites(link):
+    db = sqlite3.connect("data/sites.sqlite")
+    cursor = db.cursor()
+    cursor.execute('''
+            DELETE FROM sites WHERE link = ?
+    ''', (link, ))
+    db.commit()
+    db.close()
+
+
 class Site():
 
     link = ""
