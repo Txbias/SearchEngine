@@ -1,6 +1,7 @@
 import dbmanager as dbm
 import operator
 import itertools
+from webcrawler import get_hostname, get_domain, get_url
 
 
 def replace_special_characters(text):
@@ -47,6 +48,12 @@ def search(query, results, current_lang):
 
         inTitle = False
         inLink = False
+
+        if len(keywords) == 1:
+            if keywords[0].lower() == get_hostname(get_domain(site[0])) or keywords[0].lower() == get_url(get_domain(site[0])):
+                values[index] += 8
+                inLink = True
+
         for keyword in keywords:
             try:
                 if keyword.lower() in site[0].lower(): # link
@@ -64,7 +71,7 @@ def search(query, results, current_lang):
                     values[index] += 2
 
                 if keyword.lower() in site[4].lower(): # paragraphs
-                    values[index] += int(site[4].lower().count(keyword.lower()) / 2)
+                    values[index] += int(site[4].lower().count(keyword.lower()) / 6)
 
 
             except AttributeError:
@@ -79,7 +86,7 @@ def search(query, results, current_lang):
 
         if site[0].count('/') <= 3:
             if inTitle or inLink:
-                values[index] += 4
+                values[index] += 5
             else:
                 values[index] += 2
 
