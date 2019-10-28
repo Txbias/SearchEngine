@@ -50,18 +50,18 @@ def search(query, results, current_lang):
         for keyword in keywords:
             try:
                 if keyword.lower() in site[0].lower(): # link
-                    values[index] += 4
+                    values[index] += 6
                     inLink = True
 
                 if keyword.lower() in site[1].lower(): # title
-                    values[index] += 4
+                    values[index] += 6
                     inTitle = True
 
                 if keyword.lower() in site[2].lower(): # description
-                    values[index] += 2
+                    values[index] += 3
 
                 if keyword.lower() in site[3].lower(): # headings
-                    values[index] += 1
+                    values[index] += 2
 
                 if keyword.lower() in site[4].lower(): # paragraphs
                     values[index] += int(site[4].lower().count(keyword.lower()) / 2)
@@ -93,7 +93,7 @@ def search(query, results, current_lang):
             if inTitle or inLink:
                 values[index] += int(site[6] / 2)
             else:
-                values[index] += int(site[6] / 5)
+                values[index] += int(site[6] / 6)
 
 
         if len(site[2]) > 120:
