@@ -305,8 +305,13 @@ def insert_into_db(sites):
                     break
             except:
                 print("Exception")
+    for i in range(100):
+        try:
+            dbm.remove_duplicates()
+            break
+        except:
+            pass
 
-    dbm.remove_duplicates()
 
 
 

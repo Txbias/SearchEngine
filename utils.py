@@ -1,7 +1,8 @@
 import dbmanager as dbm
-from webcrawler import get_domain, get_url
+
 
 def remove_incorrectly_crawled_sites():
+    from webcrawler import get_domain, get_url
     rows = dbm.get_all_rows("sites")
     rows_as_lists = list()
 
@@ -11,7 +12,7 @@ def remove_incorrectly_crawled_sites():
     index = 0
     errors = ["403 Forbidden", "Yahoo - 404 Not Found", "404 Not found", None, "Page Not Found | Reuters.com", "We're sorry, but that page cannot be found - POLITICO",
               "404 - File or directory not found.", "Bitly | Page Not Found | 404", "The page you were looking for doesn't exist – Trustpilot Support Center", "Error 404",
-              "Error 404 (Not Found)!!1", "502 Proxy Error", "Page not found - Stack Overflow"]
+              "Error 404 (Not Found)!!1", "502 Proxy Error", "Page not found - Stack Overflow", "Access Denied"]
     languages = ["de", "en", "de-de", "en-us", "it", "fr"]
 
     for row in rows_as_lists:
