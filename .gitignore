@@ -1,5 +1,8 @@
-__pycache__
+__pycache__/
 data/
-test.py
 img/
+.idea/
+venv/
 FileCrawler.py
+test.py
+todo.txt
