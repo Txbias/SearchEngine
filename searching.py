@@ -5,7 +5,6 @@ from webcrawler import get_hostname, get_domain, get_url
 
 
 def replace_special_characters(text):
-
     text = text.replace("â\x80\x93", "-")
     text = text.replace("Ã¼", "ü")
     text = text.replace("â\x80\x94", "—")
@@ -21,15 +20,15 @@ def search(query, results, current_lang):
     rows_as_lists = list()
 
     for row in rows:
-    	rows_as_lists.append(list(row))
+        rows_as_lists.append(list(row))
 
     rows_as_lists.sort()
-    rows_as_lists = list(rows_as_lists for rows_as_lists,_ in itertools.groupby(rows_as_lists))
+    rows_as_lists = list(rows_as_lists for rows_as_lists, _ in itertools.groupby(rows_as_lists))
 
     values = list()
 
     for i in range(len(rows_as_lists)):
-    	values.append(0)
+        values.append(0)
 
     index = 0
     for site in rows_as_lists:
@@ -45,48 +44,46 @@ def search(query, results, current_lang):
         else:
             rows_as_lists[index][2] = rows_as_lists[index][4]
 
-
-        inTitle = False
-        inLink = False
+        in_title = False
+        in_link = False
 
         if len(keywords) == 1:
-            if keywords[0].lower() == get_hostname(get_domain(site[0])) or keywords[0].lower() == get_url(get_domain(site[0])):
+            if keywords[0].lower() == get_hostname(get_domain(site[0])) or keywords[0].lower() == get_url(
+                    get_domain(site[0])):
                 values[index] += 8
-                inLink = True
+                in_link = True
 
         for keyword in keywords:
             try:
-                if keyword.lower() in site[0].lower(): # link
+                if keyword.lower() in site[0].lower():  # link
                     values[index] += 6
-                    inLink = True
+                    in_link = True
 
-                if keyword.lower() in site[1].lower(): # title
+                if keyword.lower() in site[1].lower():  # title
                     values[index] += 6
-                    inTitle = True
+                    in_title = True
 
-                if keyword.lower() in site[2].lower(): # description
+                if keyword.lower() in site[2].lower():  # description
                     values[index] += 3
 
-                if keyword.lower() in site[3].lower(): # headings
+                if keyword.lower() in site[3].lower():  # headings
                     values[index] += 2
 
-                if keyword.lower() in site[4].lower(): # paragraphs
+                if keyword.lower() in site[4].lower():  # paragraphs
                     values[index] += int(site[4].lower().count(keyword.lower()) / 6)
-
 
             except AttributeError:
                 pass
 
-
-        if float(site[5]) < 2: # answer time
+        if float(site[5]) < 2:  # answer time
             values[index] += 1
 
-        if site[6] == current_lang: # language
+        if site[6] == current_lang:  # language
             values[index] += 3
 
         if site[0].count('/') <= 3:
-            if inTitle or inLink:
-                values[index] += 5
+            if in_title or in_link:
+                values[index] += 1
             else:
                 values[index] += 2
 
@@ -96,15 +93,14 @@ def search(query, results, current_lang):
         if site[0].count('.') <= 2:
             values[index] += 1
 
-        if int(site[6]) > 0: # times found
-            if inTitle or inLink:
+        if int(site[6]) > 0:  # times found
+            if in_title or in_link:
                 values[index] += int(site[6] / 2)
             else:
                 values[index] += int(site[6] / 6)
 
-
-        if len(site[2]) > 120:
-            rows_as_lists[index][2] = site[2][:120]
+        if len(site[2]) > 300:
+            rows_as_lists[index][2] = site[2][:300]
 
         if len(site[1]) > 118:
             rows_as_lists[index][1] = site[1][:115] + "..."
@@ -112,17 +108,14 @@ def search(query, results, current_lang):
                 values[index] -= 1
         index += 1
 
-
-
     valued_sites = list()
 
     index = 0
     for site in rows_as_lists:
-    	valued_sites.append((site, values[index]))
-    	index += 1
+        valued_sites.append((site, values[index]))
+        index += 1
 
-
-    valued_sites.sort(key = operator.itemgetter(1), reverse = True)
+    valued_sites.sort(key=operator.itemgetter(1), reverse=True)
 
     if len(valued_sites) == 0:
         return []
@@ -133,7 +126,6 @@ def search(query, results, current_lang):
         returns = list()
         for i in range(results):
             returns.append(valued_sites[i][0])
-
 
         big_index = 0
         for r in returns:

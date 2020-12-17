@@ -9,15 +9,14 @@ import sys
 import stopit
 import time
 from datetime import datetime
-import utils
 
-
-url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
-suburl_pattern = re.compile("(/[\w0-9]+)+")
-html_cleanr = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
+url_pattern = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+sub_url_pattern = re.compile("(/[\\w0-9]+)+")
+html_cleaner = re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});')
 
 user_agent = 'search'
 date_format = "%m/%d/%Y"
+
 
 def get_url_to_robots(url):
     if str(url).endswith("/"):
@@ -31,14 +30,13 @@ def get_url_to_robots(url):
 def get_url(domain):
     return "https://" + domain
 
-def get_hostname(domain):
 
-    domain = domain[:domain.rfind(".")] # Remove top level get_domain
+def get_hostname(domain):
+    domain = domain[:domain.rfind(".")]  # Remove top level get_domain
     while "." in domain:
         domain = domain[domain.find(".") + 1:]
 
     return domain
-
 
 
 def check_url(url):
@@ -49,8 +47,6 @@ def check_url(url):
         else:
             return False
     except ValueError:
-        return False
-    except requests.exceptions.MissingSchema:
         return False
     except requests.exceptions.ConnectTimeout:
         return False
@@ -68,7 +64,7 @@ def get_domain(url):
     return url
 
 
-def isExisting(link, rows):
+def is_existing(link, rows):
     return_value = False
     for row in rows:
         if link in row[0][0]:
@@ -76,17 +72,21 @@ def isExisting(link, rows):
 
     return return_value
 
+
 def get_site_information(url):
+    content = None
     for i in range(100):
         try:
-            starttime = time.time()
+            start_time = time.time()
             content = requests.get(url).text
-            endtime = time.time()
-            totaltime = round(endtime - starttime, 3)
+            end_time = time.time()
+            total_time = round(end_time - start_time, 3)
             break
         except requests.exceptions.ConnectionError:
             pass
 
+    if content is None:
+        return
 
     soup = BeautifulSoup(content, "html.parser")
 
@@ -105,7 +105,7 @@ def get_site_information(url):
 
     index = 0
     for heading in headings:
-        headings[index] = re.sub(html_cleanr, '', str(heading))
+        headings[index] = re.sub(html_cleaner, '', str(heading))
         headings[index] = headings[index].strip()
         index += 1
 
@@ -116,19 +116,17 @@ def get_site_information(url):
     if len(heading_text) > 700:
         heading_text = heading_text[:700]
 
-
     paragraphs = soup.find_all('p')
     p_text = ""
 
     for p in paragraphs:
         p_text += str(p)
 
-    p_text = re.sub(html_cleanr, '', p_text)
+    p_text = re.sub(html_cleaner, '', p_text)
     p_text = " ".join(p_text.split())
 
     if len(p_text) > 700:
         p_text = p_text[:700]
-
 
     metas = soup.find_all('meta')
     description = ""
@@ -150,7 +148,7 @@ def get_site_information(url):
     if language is None:
         language = " "
 
-    datestring = time.strftime(date_format, time.gmtime())
+    date_string = time.strftime(date_format, time.gmtime())
 
     for i in range(100):
         try:
@@ -164,18 +162,15 @@ def get_site_information(url):
         if url in row[0][0]:
             times_found = int(row[0][6] + 1)
 
-
-    site = dbm.Site(url, title, description, heading_text, p_text, totaltime, times_found, language, datestring)
+    site = dbm.Site(url, title, description, heading_text, p_text, total_time, times_found, language, date_string)
 
     return site
 
 
 def crawl_page(url):
-
     if not check_url(url):
         return
 
-    domain = get_domain(url)
     try:
         content = requests.get(url).text
     except requests.exceptions.ConnectionError:
@@ -188,7 +183,7 @@ def crawl_page(url):
     rows = dbm.get_all_rows("sites")
     for i in range(100):
         try:
-            if isExisting(site.link, rows):
+            if is_existing(site.link, rows):
                 dbm.update_column(site)
                 break
             else:
@@ -204,16 +199,15 @@ def crawl_page(url):
         links[index] = link.get('href')
         index += 1
 
-    links = list(filter(None, links)) # remove empty strings
+    links = list(filter(None, links))  # remove empty strings
 
-
-    links = list(set(links)) # removing duplicates
+    links = list(set(links))  # removing duplicates
     filtered_links = list()
     for link in links:
         if url_pattern.match(link):
             filtered_links.append(link)
             links.remove(link)
-        elif suburl_pattern.match(link):
+        elif sub_url_pattern.match(link):
             if str(link).startswith("/") and url.endswith("/"):
                 filtered_links.append(get_url(get_domain(url[:-1])) + link)
             else:
@@ -223,8 +217,8 @@ def crawl_page(url):
 
     index = 0
     for link in filtered_links:
-        if "?" in link: # Found get parameter
-            filtered_links[index] = filtered_links[index][:filtered_links[index].find("?")] # Remove get parameters
+        if "?" in link:  # Found get parameter
+            filtered_links[index] = filtered_links[index][:filtered_links[index].find("?")]  # Remove get parameters
 
         if "#" in link:
             filtered_links[index] = filtered_links[index][:filtered_links[index].find("#")]
@@ -234,7 +228,6 @@ def crawl_page(url):
 
         index += 1
 
-
     filtered_links.append(url)
 
     print("Links found: ", len(filtered_links))
@@ -242,14 +235,13 @@ def crawl_page(url):
         if not check_url(link):
             filtered_links.remove(link)
 
-
     sites = list()
 
     for link in filtered_links:
         if link in get_url(get_domain(link)):
             pass
 
-        elif not link in url:
+        elif link not in url:
             domain = get_domain(link)
             robots_url = get_url_to_robots(get_url(domain))
             try:
@@ -267,7 +259,6 @@ def crawl_page(url):
             except:
                 filtered_links.remove(link)
 
-
     for link in filtered_links:
         if get_url(get_domain(link)) + str("/sitemap") in link:
             print(1)
@@ -277,7 +268,7 @@ def crawl_page(url):
         filtered_links.remove(link)
 
     # Adding all sites to the db in a seperate thread
-    threading.Thread(target=insert_into_db, args=(sites, )).start()
+    threading.Thread(target=insert_into_db, args=(sites,)).start()
     print("Links found: ", len(sites))
 
     if len(sites) > 0:
@@ -294,14 +285,14 @@ def insert_into_db(sites):
     for site in sites:
         for i in range(100):
             try:
-                if isExisting(site.link, rows):
+                if is_existing(site.link, rows):
                     dbm.update_column(site)
                     break
-                elif isExisting(site.link + "/", rows):
+                elif is_existing(site.link + "/", rows):
                     site.link = site.link + "/"
                     dbm.update_column(site)
                     break
-                elif isExisting(site.link[:-1], rows):
+                elif is_existing(site.link[:-1], rows):
                     site.link = site.link[:-1]
                     dbm.update_column(site)
                     break
@@ -318,8 +309,6 @@ def insert_into_db(sites):
             pass
 
 
-
-
 def crawl():
     while True:
 
@@ -327,16 +316,15 @@ def crawl():
         if len(crawl_rows) < 2:
             sites_rows = dbm.get_all_rows("sites")
             print("sites: " + str(len(sites_rows)))
-            sites_rows.sort(key=lambda row: datetime.strptime(row[8], date_format)) # Sort by date
-            sites_rows = sites_rows[:400] # Get the 400 oldest links
+            sites_rows.sort(key=lambda row: datetime.strptime(row[8], date_format))  # Sort by date
+            sites_rows = sites_rows[:400]  # Get the 400 oldest links
             for row in sites_rows:
-                for i in range(100): # trys it 100 times
+                for i in range(100):  # tries it 100 times
                     try:
                         dbm.insert_into_crawl(str(row[0]))
                         break
                     except dbm.sqlite3.OperationalError:
                         pass
-
 
         rows = dbm.get_all_rows("crawl")
         print("URLS in crawl memory: " + str(len(rows)))
@@ -349,12 +337,10 @@ def crawl():
 
         else:
             crawl_pages = ["https://www.Gitub.com", "https://twitter.com", "https://google.de", "https://leo.org",
-                              "https://wikipedia.org"]
+                           "https://wikipedia.org"]
             crawl_page(random.choice(crawl_pages))
 
         print("Total found sites: " + str(len(dbm.get_all_rows("sites"))))
-
-
 
 
 if __name__ == "__main__":
@@ -366,7 +352,7 @@ if __name__ == "__main__":
     amount_threads = None
     try:
         amount_threads = int(sys.argv[1])
-    except:
+    except ValueError:
         exit("Usage: python webcrawler.py [amount of threads]")
 
     threads = list()
