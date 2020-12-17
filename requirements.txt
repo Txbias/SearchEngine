@@ -2,3 +2,4 @@ reppy
 bs4
 stopit
 flask
+requests
