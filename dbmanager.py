@@ -38,7 +38,7 @@ def update_column(site):
             UPDATE sites SET title = ?, description = ?, heading = ?, paragraph = ?, answer_time = ?, times_found = ? WHERE link = ?
     ''', (site.title, site.description, site.heading, site.paragraph, site.answer_time, site.times_found, site.link))
     db.commit()
-    cb.close()
+    db.close()
 
 def insert_into_crawl(link):
     db = sqlite3.connect("data/crawl.sqlite")
